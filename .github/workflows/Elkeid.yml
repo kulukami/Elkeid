@@ -29,11 +29,5 @@ jobs:
     - name: Prerequisites
       run: sudo apt install autopoint gettext
 
-    - name: Build RASP
-      run: make -C rasp build
-
-    - name: Build Agent
-      run: cd agent && go build -o elkeid-agent
-
-    - name: Build Server
-      run: cd server/build && ./build.sh
+    - name: Build scanner_clamav
+      run: docker build -t scanner_clamav -f plugins/scanner_clamav/docker/Dockerfile .
