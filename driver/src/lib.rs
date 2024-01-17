@@ -12,7 +12,9 @@ use libc::c_int;
 use std::{
     ffi::{c_void, CStr, CString},
     fs::{File, OpenOptions},
-    io::Write,
+    io::{Cursor, Write},
+    path::Path,
+    process::{Command, Stdio},
     sync::{
         atomic::{AtomicBool, Ordering},
         Arc,
