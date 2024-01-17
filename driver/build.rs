@@ -31,7 +31,7 @@ mod lkm {
         let kmod_name_result: std::process::Output = Command::new("sh")
             .args(&[
                 "-c",
-                "grep \"MODULE_NAME\" Makefile | grep -m 1 \":=\" | awk '{print $3}'",
+                "grep \"MODULE_NAME\" LKM/Makefile | grep -m 1 \":=\" | awk '{print $3}'",
             ])
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
