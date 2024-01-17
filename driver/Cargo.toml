@@ -14,6 +14,7 @@ cc = "1.0"
 [dependencies]
 libc = "0.2.0"
 anyhow = "1"
+zip = "0.6"
 
 [[bin]]
 name = "rst"

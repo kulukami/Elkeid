@@ -1,4 +1,10 @@
 mod bindings;
+mod commit {
+    include!(concat!(env!("OUT_DIR"), "/kmod_info.rs"));
+    pub static KMOD_ZIP: &'static [u8] =
+        include_bytes!(concat!(env!("OUT_DIR"), "/kmod_source.zip"));
+}
+pub use commit::*;
 
 use anyhow::{anyhow, Result};
 use bindings::*;
@@ -15,6 +21,36 @@ use std::{
 
 pub fn save_pre_unload() {
     unsafe { tb_pre_unload() }
+}
+
+pub fn unpack_kmod_source(target_path:&str) -> Result<()> {
+    let _ = std::fs::remove_dir_all(format!("{}/{}-{}", target_path,kmod_name, kmod_version));
+    let buffer = Cursor::new(Vec::from(KMOD_ZIP));
+    let mut archive = zip::ZipArchive::new(buffer)?;
+
+    for i in 0..archive.len() {
+        let mut file = archive.by_index(i)?;
+        let zfilename = match file.enclosed_name() {
+            Some(path) => path.to_string_lossy().to_string(),
+            None => continue,
+        };
+        let mut outpath_str: String =
+            format!("{}/{}-{}/{}",target_path, kmod_name, kmod_version, zfilename);
+        outpath_str = outpath_str.replace("/LKM", "");
+        let outpath = Path::new(&outpath_str);
+        if (*file.name()).ends_with('/') {
+            std::fs::create_dir_all(&outpath).unwrap();
+            continue;
+        }
+        if let Some(p) = outpath.parent() {
+            if !p.exists() {
+                std::fs::create_dir_all(&p)?;
+            }
+        }
+        let mut outfile = std::fs::File::create(&outpath)?;
+        std::io::copy(&mut file, &mut outfile)?;
+    }
+    return Ok(());
 }
 
 pub struct RingSlot {
